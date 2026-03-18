@@ -1,3 +1,15 @@
+// 缓存 DOM 元素引用
+const elements = {
+    loginPage: document.getElementById('loginPage'),
+    welcomePage: document.getElementById('welcomePage'),
+    mainPage: document.getElementById('mainPage'),
+    loginBtn: document.getElementById('loginBtn'),
+    actionBtn: document.getElementById('actionBtn'),
+    prevBtn: document.querySelector('.swiper-button-prev'),
+    nextBtn: document.querySelector('.swiper-button-next'),
+    loginContainer: document.querySelector('.login-container')
+};
+
 // 初始化 Swiper
 let swiper;
 function initSwiper() {
@@ -14,9 +26,11 @@ function initSwiper() {
         on: {
             init: function () {
                 updateNavigationButtons();
+                updateActionButton();
             },
             slideChange: function () {
                 updateNavigationButtons();
+                updateActionButton();
             },
         },
     });
@@ -26,23 +40,30 @@ function initSwiper() {
 function updateNavigationButtons() {
     if (!swiper) return;
     
-    const prevBtn = document.querySelector('.swiper-button-prev');
-    const nextBtn = document.querySelector('.swiper-button-next');
-    
-    if (!prevBtn || !nextBtn) return;
-    
     // 第一页隐藏左按钮
     if (swiper.isBeginning) {
-        prevBtn.style.display = 'none';
+        elements.prevBtn.style.display = 'none';
     } else {
-        prevBtn.style.display = 'flex';
+        elements.prevBtn.style.display = 'flex';
     }
     
     // 最后一页隐藏右按钮
     if (swiper.isEnd) {
-        nextBtn.style.display = 'none';
+        elements.nextBtn.style.display = 'none';
     } else {
-        nextBtn.style.display = 'flex';
+        elements.nextBtn.style.display = 'flex';
+    }
+}
+
+// 更新底部按钮显示状态
+function updateActionButton() {
+    if (!swiper) return;
+    
+    // 最后一页显示"完成"，否则显示"下一步"
+    if (swiper.isEnd) {
+        elements.actionBtn.textContent = '完成';
+    } else {
+        elements.actionBtn.textContent = '下一步';
     }
 }
 
@@ -53,8 +74,8 @@ function checkLoginStatus() {
     
     if (isLoggedIn === 'true') {
         // 已登录
-        document.getElementById('loginPage').classList.add('hidden');
-        document.getElementById('mainPage').classList.add('active');
+        elements.loginPage.classList.add('hidden');
+        elements.mainPage.classList.add('active');
         
         if (hasSeenWelcome !== 'true') {
             // 第一次登录，显示欢迎页
@@ -62,18 +83,16 @@ function checkLoginStatus() {
         }
     } else {
         // 未登录，显示登录页
-        document.getElementById('loginPage').classList.remove('hidden');
-        document.getElementById('welcomePage').classList.remove('active');
-        document.getElementById('mainPage').classList.remove('active');
+        elements.loginPage.classList.remove('hidden');
+        elements.welcomePage.classList.remove('active');
+        elements.mainPage.classList.remove('active');
     }
 }
 
 // 处理登录
 function handleLogin() {
-    const loginBtn = document.getElementById('loginBtn');
-    
     // 添加扩展动画类
-    loginBtn.classList.add('expand');
+    elements.loginBtn.classList.add('expand');
     
     // 等待动画完成后执行登录
     setTimeout(() => {
@@ -82,16 +101,14 @@ function handleLogin() {
 }
 
 function performLogin() {
-    const loginBtn = document.getElementById('loginBtn');
-    
     // 保存登录状态
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('username', 'User');
     
     // 隐藏登录页和按钮
-    document.getElementById('loginPage').classList.add('hidden');
-    loginBtn.classList.add('hidden');
-    loginBtn.classList.remove('expand'); // 移除动画类
+    elements.loginPage.classList.add('hidden');
+    elements.loginBtn.classList.add('hidden');
+    elements.loginBtn.classList.remove('expand'); // 移除动画类
     
     // 显示欢迎页
     showWelcomePage();
@@ -99,14 +116,13 @@ function performLogin() {
 
 // 显示欢迎页
 function showWelcomePage() {
-    const welcomePage = document.getElementById('welcomePage');
-    // welcomePage.setAttribute('view-transition-name', 'login-button');
-    welcomePage.classList.add('active');
+    // elements.welcomePage.setAttribute('view-transition-name', 'login-button');
+    elements.welcomePage.classList.add('active');
     
     // 初始化 Swiper
     if (!swiper) {
         initSwiper();
-        // welcomePage.setAttribute('view-transition-name', 'no');
+        // elements.welcomePage.setAttribute('view-transition-name', 'no');
     }
 }
 
@@ -116,41 +132,46 @@ function enterMainPage() {
     localStorage.setItem('hasSeenWelcome', 'true');
     
     // 隐藏欢迎页
-    document.getElementById('welcomePage').classList.remove('active');
+    elements.welcomePage.classList.remove('active');
     
     // 显示主页
-    document.getElementById('mainPage').classList.add('active');
+    elements.mainPage.classList.add('active');
+}
+
+// 处理按钮点击
+function handleActionBtn() {
+    if (swiper.isEnd) {
+        enterMainPage();
+    } else {
+        goToNextSlide();
+    }
 }
 
 // 退出登录
 function handleLogout() {
-    const loginBtn = document.getElementById('loginBtn');
-    const loginPage = document.getElementById('loginPage');
-    const loginContainer = document.querySelector('.login-container');
-    
     // 重置页面显示
-    document.getElementById('mainPage').classList.remove('active');
-    document.getElementById('welcomePage').classList.remove('active');
+    elements.mainPage.classList.remove('active');
+    elements.welcomePage.classList.remove('active');
     
     // 先显示登录页面（隐藏状态）
-    loginPage.classList.remove('hidden');
-    loginBtn.classList.remove('hidden');
+    elements.loginPage.classList.remove('hidden');
+    elements.loginBtn.classList.remove('hidden');
     
     // 确保登录容器内容不可见
-    if (loginContainer) {
-        loginContainer.classList.remove('visible');
+    if (elements.loginContainer) {
+        elements.loginContainer.classList.remove('visible');
     }
     
     // 添加收缩动画类，让按钮从全屏变回圆形
-    loginBtn.classList.add('shrink');
+    elements.loginBtn.classList.add('shrink');
     
     // 等待收缩动画完成后清除状态并显示完整登录页面
     setTimeout(() => {
-        loginBtn.classList.remove('shrink');
+        elements.loginBtn.classList.remove('shrink');
         
         // 淡入显示登录容器内容（标题和按钮文字）
-        if (loginContainer) {
-            loginContainer.classList.add('visible');
+        if (elements.loginContainer) {
+            elements.loginContainer.classList.add('visible');
         }
         
         // 清除登录状态
@@ -167,8 +188,8 @@ function handleLogout() {
 
 // 查看教程 (重新显示欢迎页)
 function showTutorial() {
-    document.getElementById('mainPage').classList.remove('active');
-    document.getElementById('welcomePage').classList.add('active');
+    elements.mainPage.classList.remove('active');
+    elements.welcomePage.classList.add('active');
     
     // 重置 Swiper 到第一页
     if (swiper) {
