@@ -75,11 +75,16 @@ function checkLoginStatus() {
     if (isLoggedIn === 'true') {
         // 已登录
         elements.loginPage.classList.add('hidden');
-        elements.mainPage.classList.add('active');
         
         if (hasSeenWelcome !== 'true') {
             // 第一次登录，显示欢迎页
+            elements.mainPage.classList.remove('active');
+            elements.welcomePage.classList.add('active');
             showWelcomePage();
+        } else {
+            // 非第一次登录，直接显示主页
+            elements.welcomePage.classList.remove('active');
+            elements.mainPage.classList.add('active');
         }
     } else {
         // 未登录，显示登录页
@@ -116,13 +121,13 @@ function performLogin() {
 
 // 显示欢迎页
 function showWelcomePage() {
-    // elements.welcomePage.setAttribute('view-transition-name', 'login-button');
+    // welcomePage.setAttribute('view-transition-name', 'login-button');
     elements.welcomePage.classList.add('active');
     
     // 初始化 Swiper
     if (!swiper) {
         initSwiper();
-        // elements.welcomePage.setAttribute('view-transition-name', 'no');
+        // welcomePage.setAttribute('view-transition-name', 'no');
     }
 }
 
